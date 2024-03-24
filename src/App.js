@@ -1,8 +1,9 @@
 import {useEffect, useState} from "react";
-import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import WeatherBox from "./component/WeatherBox.js"
-import WeatherButton from "./component/WeatherButton.js"
+import './App.css';
+import WeatherBox from "./component/WeatherBox.js";
+import WeatherButton from "./component/WeatherButton.js";
+import ClipLoader from "react-spinners/ClipLoader";
 
 // 1. 앱이 실행되자마자 현재 위치 기반의 날씨가 보인다.
 // 2. 날씨 정보에는 도시, 섭씨, 화씨
@@ -12,8 +13,12 @@ import WeatherButton from "./component/WeatherButton.js"
 // 6. 데이터를 들고 오는 동안 로딩 스피너가 돈다.
 
 function App() {
+  const cities = ['Paris', 'New York', 'Tokyo', 'Seoul'];
 
   const [weather, setWeather] = useState(null);
+  const [city, setCity] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [btnActive, setBtnActive] = useState('');
 
   const getCurrentLocation = () => {
     navigator.geolocation.getCurrentPosition((position) => {
@@ -24,22 +29,57 @@ function App() {
   }
 
   const getWeatherByCurrentLocation = async (lat, lon) => {
-    let url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=925f69a424e2fad2d0429ea3b7e9dd60&units=metric`;
-    let response = await fetch(url);
-    let data = await response.json();
-    setWeather(data);
+    try {
+      let url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=925f69a424e2fad2d0429ea3b7e9dd60&units=metric`;
+      setLoading(true);
+      let response = await fetch(url);
+      let data = await response.json();
+      setWeather(data);
+      setLoading(false);
+    } catch (err) {
+      setWeather(err.message);
+      setLoading(false);
+    }
   }
 
+  const getWeatherByCity = async () => {
+    try {
+      let url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=925f69a424e2fad2d0429ea3b7e9dd60&units=metric`;
+      setLoading(true);
+      let response = await fetch(url);
+      let data = await response.json();
+      setWeather(data);
+      setLoading(false);
+    } catch (err) {
+      setWeather(err.message);
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    getCurrentLocation();
-  }, [])
+    if (city === "") {
+      getCurrentLocation();
+    } else {
+      getWeatherByCity();
+    }
+  }, [city]);
 
   return (
     <div>
-      <div className="container">
-        <WeatherBox weather={weather}/>
-        <WeatherButton />
-      </div>
+      {loading ? (
+        <div className="container">
+          <ClipLoader
+            color="#f88c6b"
+            loading={loading}
+            size={150}
+          />
+        </div>
+      ) : (
+        <div className="container">
+          <WeatherBox weather={weather}/>
+          <WeatherButton cities={cities} setCity={setCity} getCurLoc={getCurrentLocation} btnActive={btnActive} setBtnActive={setBtnActive}/>
+        </div>
+      )}
     </div>
   );
 }
