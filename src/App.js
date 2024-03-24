@@ -13,7 +13,7 @@ import ClipLoader from "react-spinners/ClipLoader";
 // 6. 데이터를 들고 오는 동안 로딩 스피너가 돈다.
 
 function App() {
-  const cities = ['Paris', 'New York', 'Tokyo', 'Seoul'];
+  const cities = ['Beijing', 'New York', 'Tokyo', 'Seoul'];
 
   const [weather, setWeather] = useState(null);
   const [city, setCity] = useState('');
